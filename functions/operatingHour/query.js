@@ -12,29 +12,19 @@ exports.handler = async function(context, event, callback) {
   const documentClient = new AWS.DynamoDB.DocumentClient();
 
   const {
-    phoneNumber,
+    label,
   } = event;
   try {
-    const result = await documentClient.scan({
-      TableName: context['PHONE_PROVISIONING_TABLE'],
+    const result = await documentClient.query({
+      TableName: context['OPERATING_HOUR_TABLE'],
+      KeyConditionExpression: 'Label = :Label',
+      ExpressionAttributeValues: {
+        ':Label': label,
+      },
     }).promise();
-    const items = result ? result.Items.filter(
-        x => x.phoneNumber.includes(phoneNumber)) : [];
 
-    if (items.length > 0) return callback(null, utils.response('json', {
-      Name: items[0].name,
-      PhoneNumber: items[0].phoneNumber,
-      WorkspaceSid: items[0].workspaceSid,
-      Timeout: items[0].timeout,
-      Priority: items[0].priority,
-      TaskChannel: items[0].taskChannel,
-      WorkflowSid: items[0].workflowSid,
-      Type: items[0].type,
-      QueueSid: items[0].queueSid || '',
-      WorkerSid: items[0].workerSid || '',
-    }));
-    else return callback(null, utils.response('json', {
-      error: 'Not Found',
+    return callback(null, utils.response('json', {
+      result: result.Items,
     }));
   } catch (e) {
     return callback(null, utils.response('json', {

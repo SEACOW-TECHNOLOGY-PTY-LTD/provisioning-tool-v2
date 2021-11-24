@@ -15,25 +15,16 @@ exports.handler = async function(context, event, callback) {
   const documentClient = new AWS.DynamoDB.DocumentClient();
 
   const {
-    sid,
-    type,
-    dayOfWeek,
-    isOpen,
-    open,
-    close,
+    label,
+    content,
   } = event;
 
   try {
     const item = await documentClient.put({
       TableName: context['OPERATING_HOUR_TABLE'],
       Item: {
-        Id: uuidv4(),
-        Sid: sid,
-        Type: type,
-        DayOfWeek: dayOfWeek,
-        IsOpen: isOpen,
-        Open: open,
-        Close: close,
+        Label: label,
+        Content: content,
       },
     }).promise();
 

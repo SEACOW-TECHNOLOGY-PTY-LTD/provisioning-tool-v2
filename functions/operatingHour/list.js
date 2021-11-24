@@ -13,7 +13,7 @@ exports.handler = async function(context, event, callback) {
 
   try {
     const result = await documentClient.scan({
-      TableName: context['PHONE_PROVISIONING_TABLE'],
+      TableName: context['OPERATING_HOUR_TABLE'],
     }).promise();
     const items = result ? result.Items : [];
 

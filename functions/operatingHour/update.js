@@ -12,59 +12,23 @@ exports.handler = async function(context, event, callback) {
   const documentClient = new AWS.DynamoDB.DocumentClient();
 
   const {
-    Id,
-    name,
-    phoneNumber,
-    workspaceSid,
-    timeout,
-    priority,
-    taskChannel,
-    workflowSid,
-    type,
-    queueSid = '',
-    workerSid = '',
+    label,
+    content,
   } = event;
 
   try {
     const params = {
-      TableName: context['PHONE_PROVISIONING_TABLE'],
+      TableName: context['OPERATING_HOUR_TABLE'],
       Key: {
-        Id: Id,
+        Label: label,
       },
       UpdateExpression: 'set ' +
-          '#name = :name, ' +
-          '#phoneNumber = :phoneNumber, ' +
-          '#workspaceSid = :workspaceSid, ' +
-          '#timeout = :timeout, ' +
-          '#priority = :priority, ' +
-          '#taskChannel = :taskChannel, ' +
-          '#workflowSid = :workflowSid, ' +
-          '#type = :type, ' +
-          '#queueSid = :queueSid, ' +
-          '#workerSid = :workerSid',
+          '#Content = :Content',
       ExpressionAttributeNames: {
-        '#name': 'name',
-        '#phoneNumber': 'phoneNumber',
-        '#workspaceSid': 'workspaceSid',
-        '#timeout': 'timeout',
-        '#priority': 'priority',
-        '#taskChannel': 'taskChannel',
-        '#workflowSid': 'workflowSid',
-        '#type': 'type',
-        '#queueSid': 'queueSid',
-        '#workerSid': 'workerSid',
+        '#Content': 'Content',
       },
       ExpressionAttributeValues: {
-        ':name': name,
-        ':phoneNumber': phoneNumber,
-        ':workspaceSid': workspaceSid,
-        ':timeout': timeout,
-        ':priority': priority,
-        ':taskChannel': taskChannel,
-        ':workflowSid': workflowSid,
-        ':type': type,
-        ':queueSid': queueSid,
-        ':workerSid': workerSid,
+        ':Content': content,
       },
     };
 
