@@ -25,7 +25,7 @@ exports.handler = async function(context, event, callback) {
       name: items[0].Name,
       phoneNumber: items[0].PhoneNumber,
       workspaceSid: items[0].WorkspaceSid,
-      timeout: items[0].Timeout,
+      timeout: items[0].timeout,
       priority: items[0].Priority,
       taskChannel: items[0].TaskChannel,
       workflowSid: items[0].WorkflowSid,
