@@ -68,19 +68,19 @@ exports.handler = async function(context, event, callback) {
 
       const queue = await client.taskrouter.workspaces(
           context['TWILIO_WORKSPACE_SID']).
-          taskQueues(queueSid).
-          update({
-            targetWorkers,
-          });
+      taskQueues(queueSid).
+      update({
+        targetWorkers,
+      });
 
       return callback(null, utils.response('json', queue));
     } else {
       const queue = await client.taskrouter.workspaces(
           context['TWILIO_WORKSPACE_SID']).
-          taskQueues(queueSid).
-          update({
-            targetWorkers: '1 != 1',
-          });
+      taskQueues(queueSid).
+      update({
+        targetWorkers: '1 != 1',
+      });
 
       return callback(null, utils.response('json', queue));
     }

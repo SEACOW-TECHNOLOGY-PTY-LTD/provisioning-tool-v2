@@ -2,39 +2,39 @@ let path = Runtime.getFunctions()['utils'].path;
 let utils = require(path);
 
 exports.handler = async function(context, event, callback) {
-  const client = context.getTwilioClient();
+    const client = context.getTwilioClient();
 
-  const {
-    workerSid,
-    phoneNumber,
-  } = event;
+    const {
+        workerSid,
+        phoneNumber,
+    } = event;
 
-  try {
-    let worker = await client.taskrouter.workspaces(
-        context['TWILIO_WORKSPACE_SID']).workers(workerSid).fetch();
+    try {
+        let worker = await client.taskrouter.workspaces(
+            context['TWILIO_WORKSPACE_SID']).workers(workerSid).fetch();
 
-    const attributes = JSON.parse(worker.attributes);
+        const attributes = JSON.parse(worker.attributes);
 
-    attributes.phone = phoneNumber;
+        attributes.phone = phoneNumber;
 
-    worker = await client.taskrouter.workspaces(
-        context['TWILIO_WORKSPACE_SID']).
+        worker = await client.taskrouter.workspaces(
+            context['TWILIO_WORKSPACE_SID']).
         workers(workerSid).
         update({attributes: JSON.stringify(attributes)});
 
-    return callback(
-        null,
-        utils.response('json', {
-          worker,
-        }),
-    );
-  } catch (e) {
-    console.error(e);
-    return callback(
-        null,
-        utils.response('text', {
-          e,
-        }),
-    );
-  }
+        return callback(
+            null,
+            utils.response('json', {
+                worker,
+            }),
+        );
+    } catch (e) {
+        console.error(e);
+        return callback(
+            null,
+            utils.response('text', {
+                e,
+            }),
+        );
+    }
 };

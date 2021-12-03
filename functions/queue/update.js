@@ -32,15 +32,15 @@ exports.handler = async function(context, event, callback) {
   try {
     const queue = await client.taskrouter.workspaces(
         context['TWILIO_WORKSPACE_SID']).
-        taskQueues(queueSid).
-        update({
-          assignmentActivitySid,
-          reservationActivitySid,
-          targetWorkers,
-          friendlyName,
-          taskOrder,
-          maxReservedWorkers,
-        });
+    taskQueues(queueSid).
+    update({
+      assignmentActivitySid,
+      reservationActivitySid,
+      targetWorkers,
+      friendlyName,
+      taskOrder,
+      maxReservedWorkers,
+    });
 
     const params = {
       TableName: context['VOICEMAIL_CALLBACK_CONFIGURATIONS_TABLE'],

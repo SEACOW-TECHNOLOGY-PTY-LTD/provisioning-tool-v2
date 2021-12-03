@@ -27,6 +27,7 @@ exports.handler = async function(context, event, callback) {
     type = '',
     queueSid = '',
     workerSid = '',
+    phoneSource = '',
   } = event;
 
   try {
@@ -62,9 +63,9 @@ exports.handler = async function(context, event, callback) {
           Type: type,
           QueueSid: queueSid,
           WorkerSid: workerSid,
+          Source: phoneSource,
         },
       }).promise();
-
       return callback(null, utils.response('json', item));
     } else {
       return callback(null, utils.response('json', {

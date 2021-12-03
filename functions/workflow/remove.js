@@ -10,8 +10,8 @@ exports.handler = async function(context, event, callback) {
 
   try {
     await client.taskrouter.workspaces(context['TWILIO_WORKSPACE_SID']).
-        workflows(workflowSid).
-        remove();
+    workflows(workflowSid).
+    remove();
 
     return callback(null, utils.response('json', {
       result: 'Success',

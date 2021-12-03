@@ -16,14 +16,14 @@ exports.handler = async function(context, event, callback) {
   try {
     const workflow = await client.taskrouter.workspaces(
         context['TWILIO_WORKSPACE_SID']).
-        workflows(workflowSid).
-        update({
-          friendlyName,
-          configuration,
-          assignmentCallbackUrl,
-          fallbackAssignmentCallbackUrl,
-          taskReservationTimeout,
-        });
+    workflows(workflowSid).
+    update({
+      friendlyName,
+      configuration,
+      assignmentCallbackUrl,
+      fallbackAssignmentCallbackUrl,
+      taskReservationTimeout,
+    });
 
     return callback(null, utils.response('json', workflow));
   } catch (e) {

@@ -21,8 +21,8 @@ exports.handler = async function(context, event, callback) {
   try {
     worker = await client.taskrouter.workspaces(
         context['TWILIO_WORKSPACE_SID']).
-        workers(workerSid).
-        fetch();
+    workers(workerSid).
+    fetch();
 
     if (!worker) {
       return callback(null, utils.response('json', {
@@ -63,8 +63,8 @@ exports.handler = async function(context, event, callback) {
     attributes['skills'] = newSkills;
 
     await client.taskrouter.workspaces(context['TWILIO_WORKSPACE_SID']).
-        workers(workerSid).
-        update({attributes: JSON.stringify(attributes)});
+    workers(workerSid).
+    update({attributes: JSON.stringify(attributes)});
   } catch (e) {
     console.log(`error2: ${e}`);
     return callback(null, utils.response('json', {

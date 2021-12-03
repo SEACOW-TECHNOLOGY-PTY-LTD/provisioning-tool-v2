@@ -24,7 +24,7 @@ exports.handler = async function(context, event, callback) {
 
     const queues = await client.taskrouter.workspaces(
         context['TWILIO_WORKSPACE_SID']).
-        taskQueues.list();
+    taskQueues.list();
 
     const items = [];
 

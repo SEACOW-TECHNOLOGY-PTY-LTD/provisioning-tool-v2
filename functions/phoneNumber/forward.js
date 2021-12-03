@@ -15,6 +15,7 @@ exports.handler = async function(context, event, callback) {
     Id,
     enableForward,
     forwardNumber,
+    timeout,
   } = event;
 
   try {
@@ -25,14 +26,17 @@ exports.handler = async function(context, event, callback) {
       },
       UpdateExpression: 'set ' +
           '#enableForward = :enableForward, ' +
-          '#forwardNumber = :forwardNumber',
+          '#forwardNumber = :forwardNumber, ' +
+          '#timeout = :timeout',
       ExpressionAttributeNames: {
         '#enableForward': 'EnableForward',
         '#forwardNumber': 'ForwardNumber',
+        '#timeout': 'timeout',
       },
       ExpressionAttributeValues: {
         ':enableForward': enableForward,
         ':forwardNumber': forwardNumber,
+        ':timeout': timeout,
       },
     };
 

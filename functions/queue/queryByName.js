@@ -11,7 +11,7 @@ exports.handler = async function(context, event, callback) {
   try {
     const queues = await client.taskrouter.workspaces(
         context['TWILIO_WORKSPACE_SID']).
-        taskQueues.list();
+    taskQueues.list();
 
     let result = queues.filter(queue => queue.friendlyName === name);
     result = result.length > 0 ? result[0] : {};

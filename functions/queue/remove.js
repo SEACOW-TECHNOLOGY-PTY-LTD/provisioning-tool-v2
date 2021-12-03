@@ -19,8 +19,8 @@ exports.handler = async function(context, event, callback) {
 
   try {
     await client.taskrouter.workspaces(context['TWILIO_WORKSPACE_SID']).
-        taskQueues(queueSid).
-        remove();
+    taskQueues(queueSid).
+    remove();
 
     const result = await documentClient.scan({
       TableName: context['VOICEMAIL_CALLBACK_CONFIGURATIONS_TABLE'],

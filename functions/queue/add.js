@@ -32,21 +32,21 @@ exports.handler = async function(context, event, callback) {
   try {
     const queue = await client.taskrouter.workspaces(
         context['TWILIO_WORKSPACE_SID']).
-        taskQueues.
-        create({
-          assignmentActivitySid: assignmentActivitySid,
-          reservationActivitySid: reservationActivitySid,
-          targetWorkers: targetWorkers,
-          friendlyName: friendlyName,
-          taskOrder: taskOrder,
-        });
+    taskQueues.
+    create({
+      assignmentActivitySid: assignmentActivitySid,
+      reservationActivitySid: reservationActivitySid,
+      targetWorkers: targetWorkers,
+      friendlyName: friendlyName,
+      taskOrder: taskOrder,
+    });
 
     const queueUpdate = await client.taskrouter.workspaces(
         context['TWILIO_WORKSPACE_SID']).
-        taskQueues(queue.sid).
-        update({
-          maxReservedWorkers,
-        });
+    taskQueues(queue.sid).
+    update({
+      maxReservedWorkers,
+    });
 
     const item = await documentClient.put({
       TableName: context['VOICEMAIL_CALLBACK_CONFIGURATIONS_TABLE'],
