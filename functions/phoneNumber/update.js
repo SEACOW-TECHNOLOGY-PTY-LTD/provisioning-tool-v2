@@ -3,6 +3,8 @@ let utils = require(path);
 const AWS = require('aws-sdk');
 
 exports.handler = async function(context, event, callback) {
+  const client = context.getTwilioClient();
+
   AWS.config.update({
     accessKeyId: context['AWS_ACCESS_KEY_ID'],
     secretAccessKey: context['AWS_SECRET_ACCESS_KEY'],
@@ -12,68 +14,71 @@ exports.handler = async function(context, event, callback) {
   const documentClient = new AWS.DynamoDB.DocumentClient();
 
   const {
-    Id,
-    name,
-    phoneNumber,
-    workspaceSid,
-    timeout,
-    priority,
-    taskChannel,
-    workflowSid,
+    queueSid,
+    assignmentActivitySid,
+    reservationActivitySid,
+    targetWorkers,
+    taskOrder,
+    friendlyName,
+    maxReservedWorkers,
     type,
-    queueSid = '',
-    workerSid = '',
+    enableVoicemail = false,
+    enableVoicemailEmail = false,
+    enableCallback = false,
+    enableCallbackEmail = false,
+    id,
   } = event;
 
   try {
+    const queue = await client.taskrouter.workspaces(
+        context['TWILIO_WORKSPACE_SID']).
+    taskQueues(queueSid).
+    update({
+      assignmentActivitySid,
+      reservationActivitySid,
+      targetWorkers,
+      friendlyName,
+      taskOrder,
+      maxReservedWorkers,
+    });
+
     const params = {
-      TableName: context['PHONE_PROVISIONING_TABLE'],
+      TableName: context['VOICEMAIL_CALLBACK_CONFIGURATIONS_TABLE'],
       Key: {
-        Id: Id,
+        Id: id,
       },
       UpdateExpression: 'set ' +
-          '#name = :name, ' +
-          '#phoneNumber = :phoneNumber, ' +
-          '#workspaceSid = :workspaceSid, ' +
-          '#timeout = :timeout, ' +
-          '#priority = :priority, ' +
-          '#taskChannel = :taskChannel, ' +
-          '#workflowSid = :workflowSid, ' +
-          '#type = :type, ' +
-          '#queueSid = :queueSid, ' +
-          '#workerSid = :workerSid',
+          '#Type = :Type, ' +
+          '#EnableVoicemail = :EnableVoicemail, ' +
+          '#EnableVoicemailEmail = :EnableVoicemailEmail, ' +
+          '#EnableCallback = :EnableCallback, ' +
+          '#EnableCallbackEmail = :EnableCallbackEmail',
       ExpressionAttributeNames: {
-        '#name': 'Name',
-        '#phoneNumber': 'PhoneNumber',
-        '#workspaceSid': 'WorkspaceSid',
-        '#timeout': 'Timeout',
-        '#priority': 'Priority',
-        '#taskChannel': 'TaskChannel',
-        '#workflowSid': 'WorkflowSid',
-        '#type': 'Type',
-        '#queueSid': 'QueueSid',
-        '#workerSid': 'WorkerSid',
+        '#Type': 'Type',
+        '#EnableVoicemail': 'EnableVoicemail',
+        '#EnableVoicemailEmail': 'EnableVoicemailEmail',
+        '#EnableCallback': 'EnableCallback',
+        '#EnableCallbackEmail': 'EnableCallbackEmail',
       },
       ExpressionAttributeValues: {
-        ':name': name,
-        ':phoneNumber': phoneNumber,
-        ':workspaceSid': workspaceSid,
-        ':timeout': timeout,
-        ':priority': priority,
-        ':taskChannel': taskChannel,
-        ':workflowSid': workflowSid,
-        ':type': type,
-        ':queueSid': queueSid,
-        ':workerSid': workerSid,
+        ':Type': type,
+        ':EnableVoicemail': enableVoicemail,
+        ':EnableVoicemailEmail': enableVoicemailEmail,
+        ':EnableCallback': enableCallback,
+        ':EnableCallbackEmail': enableCallbackEmail,
       },
     };
 
     const item = await documentClient.update(params).promise();
 
-    return callback(null, utils.response('json', item));
+    return callback(null, utils.response('json', queue));
   } catch (e) {
-    return callback(null, utils.response('json', {
-      error: e,
-    }));
+    console.error(e);
+    return callback(
+        null,
+        utils.response('text', {
+          e,
+        }),
+    );
   }
 };
