@@ -26,6 +26,17 @@ exports.handler = async function(context, event, callback) {
   } = event;
 
   try {
+    if (workerSid) {
+      let worker = await client.taskrouter.workspaces(
+          context['TWILIO_WORKSPACE_SID']).workers(workerSid).fetch();
+
+      const attributes = JSON.parse(worker.attributes);
+      attributes.phone = phoneNumber;
+
+      await client.taskrouter.workspaces(
+          context['TWILIO_WORKSPACE_SID']).workers(workerSid)
+          .update({attributes: JSON.stringify(attributes)});
+    }
 
     const params = {
       TableName: context['PHONE_PROVISIONING_TABLE'],
