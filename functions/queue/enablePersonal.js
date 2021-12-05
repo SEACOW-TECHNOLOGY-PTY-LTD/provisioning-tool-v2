@@ -14,21 +14,13 @@ exports.handler = async function(context, event, callback) {
 
   const client = context.getTwilioClient();
 
-  const {
-    assignmentActivitySid = 'WA6c79f737c96f1b30ff31bf5b135fcf75',
-    reservationActivitySid = 'WA6c79f737c96f1b30ff31bf5b135fcf75',
-    targetWorkers = '1 != 1',
-    taskOrder = 'FIFO',
-    friendlyName,
-    type,
-    enableVoicemail = false,
-    enableVoicemailEmail = false,
-    enableCallback = false,
-    enableCallbackEmail = false,
-    maxReservedWorkers = 1,
-  } = event;
+  const assignmentActivitySid = 'WA6c79f737c96f1b30ff31bf5b135fcf75';
+  const reservationActivitySid = 'WA6c79f737c96f1b30ff31bf5b135fcf75';
+  const targetWorkers = '1 == 1';
+  const taskOrder = 'FIFO';
+  const friendlyName = 'Personal';
+  const maxReservedWorkers = 1;
 
-  console.log('1');
   try {
     const queue = await client.taskrouter.workspaces(
         context['TWILIO_WORKSPACE_SID']).
@@ -53,32 +45,27 @@ exports.handler = async function(context, event, callback) {
       friendlyName: `Assign To ${friendlyName}`,
       configuration: JSON.stringify({
         task_routing: {
-          default_filter: {
-            queue: queue.sid,
-          },
+          filters: [
+            {
+              'filter_friendly_name': 'Find Target Agent',
+              expression: '1==1',
+              targets: [
+                {
+                  queue: queue.sid,
+                  priority: 10,
+                  expression: 'task.targetAgent==worker.sid',
+                },
+              ],
+            },
+          ],
         },
       }),
     });
-
-    const item = await documentClient.put({
-      TableName: context['VOICEMAIL_CALLBACK_CONFIGURATIONS_TABLE'],
-      Item: {
-        Id: uuidv4(),
-        Sid: queue.sid,
-        Type: type,
-        EnableVoicemail: enableVoicemail,
-        EnableVoicemailEmail: enableVoicemailEmail,
-        EnableCallback: enableCallback,
-        EnableCallbackEmail: enableCallbackEmail,
-        EmailList: [],
-      },
-    }).promise();
 
     console.log(queue);
     return callback(
         null,
         utils.response('json', {
-          item,
           result: 'success',
         }),
     );

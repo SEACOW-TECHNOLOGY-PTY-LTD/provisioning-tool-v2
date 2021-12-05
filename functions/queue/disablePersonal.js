@@ -15,7 +15,6 @@ exports.handler = async function(context, event, callback) {
 
   const {
     queueSid,
-    queueName,
   } = event;
 
   let workflowSid = '';
@@ -25,7 +24,7 @@ exports.handler = async function(context, event, callback) {
         context['TWILIO_WORKSPACE_SID']).workflows.list();
 
     const workflow = workflows.filter(
-        x => x.friendlyName === `Assign To ${queueName}`);
+        x => x.friendlyName === `Assign To Personal`);
 
     if (workflow.length > 0) {
       workflowSid = workflow[0].sid;
@@ -53,26 +52,6 @@ exports.handler = async function(context, event, callback) {
     await client.taskrouter.workspaces(context['TWILIO_WORKSPACE_SID']).
         taskQueues(queueSid).
         remove();
-
-    const result = await documentClient.scan({
-      TableName: context['VOICEMAIL_CALLBACK_CONFIGURATIONS_TABLE'],
-    }).promise();
-    const items = result ? result.Items : [];
-
-    if (items.length > 0) {
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].Sid === queueSid) {
-          const params = {
-            TableName: context['VOICEMAIL_CALLBACK_CONFIGURATIONS_TABLE'],
-            Key: {
-              Id: items[i].Id,
-            },
-          };
-
-          await documentClient.delete(params).promise();
-        }
-      }
-    }
 
     return callback(null, utils.response('json', {
       result: 'Success',

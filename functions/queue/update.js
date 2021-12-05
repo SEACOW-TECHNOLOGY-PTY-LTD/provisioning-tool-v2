@@ -15,6 +15,7 @@ exports.handler = async function(context, event, callback) {
 
   const {
     queueSid,
+    queueName,
     assignmentActivitySid,
     reservationActivitySid,
     targetWorkers,
@@ -29,18 +30,45 @@ exports.handler = async function(context, event, callback) {
     id,
   } = event;
 
+  let workflowSid = '';
+
+  try {
+    const workflows = await client.taskrouter.workspaces(
+        context['TWILIO_WORKSPACE_SID']).workflows.list();
+
+    const workflow = workflows.filter(
+        x => x.friendlyName === `Assign To ${queueName}`);
+
+    if (workflow.length > 0) {
+      workflowSid = workflow[0].sid;
+    }
+  } catch (e) {
+    console.error(e);
+    return callback(null, utils.response('json', {
+      result: 'Failed',
+      error: e,
+    }));
+  }
+
   try {
     const queue = await client.taskrouter.workspaces(
         context['TWILIO_WORKSPACE_SID']).
-    taskQueues(queueSid).
-    update({
-      assignmentActivitySid,
-      reservationActivitySid,
-      targetWorkers,
-      friendlyName,
-      taskOrder,
-      maxReservedWorkers,
-    });
+        taskQueues(queueSid).
+        update({
+          assignmentActivitySid,
+          reservationActivitySid,
+          targetWorkers,
+          friendlyName,
+          taskOrder,
+          maxReservedWorkers,
+        });
+
+    const workflow = await client.taskrouter.workspaces(
+        context['TWILIO_WORKSPACE_SID']).
+        workflows(workflowSid).
+        update({
+          friendlyName: `Assign To ${friendlyName}`,
+        });
 
     const params = {
       TableName: context['VOICEMAIL_CALLBACK_CONFIGURATIONS_TABLE'],
