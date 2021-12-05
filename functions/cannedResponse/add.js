@@ -15,33 +15,27 @@ exports.handler = async function(context, event, callback) {
     const documentClient = new AWS.DynamoDB.DocumentClient();
 
     const {
-        firstName,
-        lastName,
-        email,
-        phone,
-        company = 'default',
-        department = 'default',
+        type = 'default',
+        content,
+        enabled = true
     } = event;
 
     try {
         const result = await documentClient.scan({
-            TableName: context['CONTACT_DIRECTORY_TABLE'],
+            TableName: context['CANNED_RESPONSE_TABLE'],
         }).promise();
         const items = result ? result.Items : [];
 
-        const preCheck = items.filter(x => x.email === email || x.phone === phone);
+        const preCheck = items.filter(x => x.content === content);
 
         if (preCheck.length === 0) {
             const item = await documentClient.put({
-                TableName: context['CONTACT_DIRECTORY_TABLE'],
+                TableName: context['CANNED_RESPONSE_TABLE'],
                 Item: {
                     Id: uuidv4(),
-                    FirstName: firstName,
-                    LastName: lastName,
-                    Email: email,
-                    Phone: phone,
-                    Company: company,
-                    Department: department,
+                    Type: type,
+                    Content: content,
+                    Enabled: enabled
                 },
             }).promise();
 
@@ -52,7 +46,6 @@ exports.handler = async function(context, event, callback) {
             }));
         }
     } catch (e) {
-        console.log(e)
         return callback(null, utils.response('json', {
             error: e,
         }));

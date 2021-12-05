@@ -10,6 +10,7 @@ exports.handler = async function(context, event, callback) {
   });
 
   const documentClient = new AWS.DynamoDB.DocumentClient();
+  console.log(1)
 
   const client = context.getTwilioClient();
 
@@ -17,14 +18,17 @@ exports.handler = async function(context, event, callback) {
     const result = await documentClient.scan({
       TableName: context['AGENT_PROVISIONING_TABLE'],
     }).promise();
+    console.log(2)
 
     const skills = await documentClient.scan({
       TableName: context['SKILL_TABLE'],
     }).promise();
+    console.log(skills)
 
     const workers = await client.taskrouter.workspaces(
         context['TWILIO_WORKSPACE_SID']).
     workers.list();
+    console.log(4)
 
     const items = [];
 
@@ -34,8 +38,9 @@ exports.handler = async function(context, event, callback) {
             x => x.sid === elem.WorkerSid)[0]['attributes']);
         const skillName = skills && skills.Items.length > 0
             ? skills.Items.filter(
-                x => x.Id === elem.SkillId)[0].name
-            : 'unknown';
+                x => x.Id === elem.SkillId) > 0 ? skills.Items.filter(
+            x => x.Id === elem.SkillId)[0].name
+            : 'unknown' : 'unknown';
         items.push({
           workerSid: elem.WorkerSid,
           skillId: elem.SkillId,
@@ -51,6 +56,7 @@ exports.handler = async function(context, event, callback) {
 
     return callback(null, utils.response('json', items));
   } catch (e) {
+    console.log(e)
     return callback(null, utils.response('json', {
       error: e,
     }));
