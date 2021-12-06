@@ -3,6 +3,7 @@ let utils = require(path);
 const AWS = require('aws-sdk');
 
 exports.handler = async function(context, event, callback) {
+  const client = context.getTwilioClient();
   AWS.config.update({
     accessKeyId: context['AWS_ACCESS_KEY_ID'],
     secretAccessKey: context['AWS_SECRET_ACCESS_KEY'],
@@ -84,6 +85,7 @@ exports.handler = async function(context, event, callback) {
 
     return callback(null, utils.response('json', item));
   } catch (e) {
+    console.log(e)
     return callback(null, utils.response('json', {
       error: e,
     }));
