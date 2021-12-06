@@ -27,7 +27,7 @@ exports.handler = async function(context, event, callback) {
     type = '',
     queueSid = '',
     workerSid = '',
-    phoneSource = '',
+    phoneSource = 'Twilio',
   } = event;
 
   try {
