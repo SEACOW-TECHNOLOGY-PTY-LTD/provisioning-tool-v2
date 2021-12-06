@@ -50,52 +50,63 @@ exports.handler = async function(context, event, callback) {
   }
 
   try {
-    const params = {
+    const result = await documentClient.scan({
       TableName: context['PHONE_PROVISIONING_TABLE'],
-      Key: {
-        Id: Id,
-      },
-      UpdateExpression: 'set ' +
-          '#name = :name, ' +
-          '#phoneNumber = :phoneNumber, ' +
-          '#workspaceSid = :workspaceSid, ' +
-          '#timeout = :timeout, ' +
-          '#priority = :priority, ' +
-          '#taskChannel = :taskChannel, ' +
-          '#workflowSid = :workflowSid, ' +
-          '#type = :type, ' +
-          '#queueSid = :queueSid, ' +
-          '#workerSid = :workerSid',
-      ExpressionAttributeNames: {
-        '#name': 'Name',
-        '#phoneNumber': 'PhoneNumber',
-        '#workspaceSid': 'WorkspaceSid',
-        '#timeout': 'Timeout',
-        '#priority': 'Priority',
-        '#taskChannel': 'TaskChannel',
-        '#workflowSid': 'WorkflowSid',
-        '#type': 'Type',
-        '#queueSid': 'QueueSid',
-        '#workerSid': 'WorkerSid',
-      },
-      ExpressionAttributeValues: {
-        ':name': name,
-        ':phoneNumber': phoneNumber,
-        ':workspaceSid': context['TWILIO_WORKSPACE_SID'],
-        ':timeout': timeout,
-        ':priority': priority,
-        ':taskChannel': taskChannel,
-        ':workflowSid': workflowSid,
-        ':type': type,
-        ':queueSid': queueSid,
-        ':workerSid': workerSid,
-      },
-    };
+    }).promise();
+    const items = result ? result.Items.filter(
+        x => x.PhoneNumber.includes(phoneNumber)) : [];
 
-    const item = await documentClient.update(params).promise();
+    if (items.length > 0) {
+      const params = {
+        TableName: context['PHONE_PROVISIONING_TABLE'],
+        Key: {
+          Id: items[0].Id,
+        },
+        UpdateExpression: 'set ' +
+            '#name = :name, ' +
+            '#phoneNumber = :phoneNumber, ' +
+            '#workspaceSid = :workspaceSid, ' +
+            '#timeout = :timeout, ' +
+            '#priority = :priority, ' +
+            '#taskChannel = :taskChannel, ' +
+            '#workflowSid = :workflowSid, ' +
+            '#type = :type, ' +
+            '#queueSid = :queueSid, ' +
+            '#workerSid = :workerSid',
+        ExpressionAttributeNames: {
+          '#name': 'Name',
+          '#phoneNumber': 'PhoneNumber',
+          '#workspaceSid': 'WorkspaceSid',
+          '#timeout': 'Timeout',
+          '#priority': 'Priority',
+          '#taskChannel': 'TaskChannel',
+          '#workflowSid': 'WorkflowSid',
+          '#type': 'Type',
+          '#queueSid': 'QueueSid',
+          '#workerSid': 'WorkerSid',
+        },
+        ExpressionAttributeValues: {
+          ':name': name,
+          ':phoneNumber': phoneNumber,
+          ':workspaceSid': context['TWILIO_WORKSPACE_SID'],
+          ':timeout': timeout,
+          ':priority': priority,
+          ':taskChannel': taskChannel,
+          ':workflowSid': workflowSid,
+          ':type': type,
+          ':queueSid': queueSid,
+          ':workerSid': workerSid,
+        },
+      };
 
-    return callback(null, utils.response('json', item));
+      const item = await documentClient.update(params).promise();
+
+      return callback(null, utils.response('json', item));
+    }
+
+    return callback(null, 'Missing ID');
   } catch (e) {
+    console.log(e);
     return callback(null, utils.response('json', {
       error: e,
     }));
